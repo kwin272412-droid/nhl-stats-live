@@ -4,14 +4,21 @@ import fetch from "node-fetch";
 const app = express();
 app.use(express.static("public"));
 
+const PROXY = "https://api.allorigins.win/raw?url=";
 const NHL_API = "https://statsapi.web.nhl.com/api/v1";
 
 async function fetchJson(url) {
-  const r = await fetch(url);
-  if (!r.ok) {
-    throw new Error("API returned " + r.status);
+  const proxyUrl = PROXY + encodeURIComponent(url);
+
+  const r = await fetch(proxyUrl);
+  const text = await r.text();
+
+  if (!text.startsWith("{") && !text.startsWith("[")) {
+    console.error("❌ Réponse non JSON:", text.slice(0, 200));
+    throw new Error("Réponse API invalide");
   }
-  return r.json();
+
+  return JSON.parse(text);
 }
 
 app.get("/api/schedule", async (req, res) => {
@@ -38,6 +45,7 @@ app.get("/api/boxscore/:gamePk", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
 
 
 
