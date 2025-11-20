@@ -4,8 +4,8 @@ import fetch from "node-fetch";
 const app = express();
 app.use(express.static("public"));
 
-// Proxy fiable
-const PROXY = "https://api.allorigins.win/raw?url=";
+// Proxy fiable pour NHL
+const PROXY = "https://corsproxy.io/?";
 const NHL_API = "https://statsapi.web.nhl.com/api/v1";
 
 async function fetchJson(url) {
@@ -26,7 +26,7 @@ app.get("/api/schedule", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error("Erreur schedule:", err);
-    res.status(500).json({ error: "API Schedule failed" });
+    res.status(500).json({ error: "internal error" });
   }
 });
 
@@ -37,12 +37,13 @@ app.get("/api/boxscore/:gamePk", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error("Erreur boxscore:", err);
-    res.status(500).json({ error: "API Boxscore failed" });
+    res.status(500).json({ error: "internal error" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
 
 
 
