@@ -4,38 +4,46 @@ import fetch from "node-fetch";
 const app = express();
 app.use(express.static("public"));
 
-// Proxy CORS pour contourner le blocage Render
-const NHL_API = "https://corsproxy.io/?https://statsapi.web.nhl.com/api/v1";
+const NHL_PROXY = "https://corsproxy.io/?";
 
 async function fetchJson(url) {
   const r = await fetch(url);
-  if (!r.ok) throw new Error("HTTP error: " + r.status);
-  return await r.json();
+  const text = await r.text();
+
+  // anti-crash : si HTML → erreur explicite
+  if (text.startsWith("<")) {
+    throw new Error("HTML response instead of JSON:\n" + text.slice(0, 200));
+  }
+
+  return JSON.parse(text);
 }
 
 app.get("/api/schedule", async (req, res) => {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const data = await fetchJson(`${NHL_API}/schedule?date=${today}`);
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "API failed" });
-  }
+    try {
+        const today = new Date().toISOString().slice(0, 10);
+        const url = `${NHL_PROXY}https://statsapi.web.nhl.com/api/v1/schedule?date=${today}`;
+        const data = await fetchJson(url);
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 app.get("/api/boxscore/:gamePk", async (req, res) => {
-  try {
-    const data = await fetchJson(`${NHL_API}/game/${req.params.gamePk}/boxscore`);
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "API failed" });
-  }
+    try {
+        const { gamePk } = req.params;
+        const url = `${NHL_PROXY}https://statsapi.web.nhl.com/api/v1/game/${gamePk}/boxscore`;
+        const data = await fetchJson(url);
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
+
 
 
 
