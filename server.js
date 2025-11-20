@@ -7,6 +7,7 @@ app.use(express.static("public"));
 // NHL API with proxy to bypass DNS failures on Render
 const NHL_API = "https://corsproxy.io/?https://statsapi.web.nhl.com/api/v1";
 
+
 async function fetchJson(url) {
   const r = await fetch(url);
   return await r.json();
@@ -26,6 +27,7 @@ app.get("/api/boxscore/:gamePk", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
 
 
 
