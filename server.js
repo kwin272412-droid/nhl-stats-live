@@ -4,7 +4,8 @@ import fetch from "node-fetch";
 const app = express();
 app.use(express.static("public"));
 
-const NHL_API = "https://statsapi.web.nhl.com/api/v1";
+const NHL_API = "https://corsproxy.io/?https://statsapi.web.nhl.com/api/v1";
+
 
 async function fetchJson(url) {
   const r = await fetch(url);
@@ -27,5 +28,6 @@ app.get("/api/boxscore/:gamePk", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
 
 
